@@ -4,9 +4,9 @@ namespace SignalRChat.Hubs
 {
     public class ChatHub : Hub
     {
-        public void Send(string name, string message)
+        public void Send(dynamic logEvent)
         {
-            Clients.All.broadcastMessage(name, message);
+            Clients.All.broadcastMessage(logEvent);
         }
     }
 }
