@@ -17,7 +17,7 @@ namespace NLog.SignalR
 
                 proxy.Invoke("Notify", hubConnection.ConnectionId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 proxy = null;
             }

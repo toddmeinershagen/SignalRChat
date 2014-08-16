@@ -45,7 +45,7 @@ namespace NLog.SignalR
 
             if (_proxy == null)
                 return;
-
+            
             var renderedMessage = Layout.Render(logEvent);
             var item = new LogEvent(logEvent, renderedMessage);
             _proxy.Invoke(MethodName, item);
