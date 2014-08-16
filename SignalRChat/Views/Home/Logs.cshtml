@@ -1,0 +1,30 @@
+﻿
+@{
+    ViewBag.Title = "Log View";
+}
+<h2>Log View</h2>
+<div class="container">
+    <ul id="logs"></ul>
+</div>
+@section scripts {
+
+    <script src="~/Scripts/jquery.signalR-2.1.1.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script>
+        $(function() {
+            var chat = $.connection.loggingHub;
+
+            chat.client.log = function(logEvent) {
+                $('#logs').append('<li><strong>' + htmlEncode(logEvent.Level)
+                    + '</strong>::' + logEvent.TimeStamp + ' - ' + htmlEncode(logEvent.Message) + '</li>');
+            };
+
+            $.connection.hub.start().done(function() {});
+        });
+
+        function htmlEncode(value) {
+            var encodedValue = $('<div />').text(value).html();
+            return encodedValue;
+        }
+    </script>
+}

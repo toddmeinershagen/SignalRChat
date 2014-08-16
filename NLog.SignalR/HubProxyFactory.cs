@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.SignalR.Client;
+﻿using System;
+using Microsoft.AspNet.SignalR.Client;
 
 namespace NLog.SignalR
 {
@@ -6,11 +7,20 @@ namespace NLog.SignalR
     {
         public IHubProxy Create(string uri, string hubName)
         {
-            var hubConnection = new HubConnection(uri);
-            var proxy = hubConnection.CreateHubProxy(hubName);
-            hubConnection.Start().Wait();
+            IHubProxy proxy = null;
 
-            proxy.Invoke("Notify", hubConnection.ConnectionId);
+            try
+            {
+                var hubConnection = new HubConnection(uri);
+                proxy = hubConnection.CreateHubProxy(hubName);
+                hubConnection.Start().Wait();
+
+                proxy.Invoke("Notify", hubConnection.ConnectionId);
+            }
+            catch (Exception)
+            {
+                proxy = null;
+            }
 
             return proxy;
         }

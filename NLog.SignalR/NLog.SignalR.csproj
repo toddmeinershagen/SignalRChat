@@ -53,6 +53,8 @@
   <ItemGroup>
     <Compile Include="HubProxyFactory.cs" />
     <Compile Include="IHubProxyFactory.cs" />
+    <Compile Include="ILoggingHub.cs" />
+    <Compile Include="LogEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SignalRTarget.cs" />
   </ItemGroup>

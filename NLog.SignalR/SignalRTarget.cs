@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.ComponentModel;
 using Microsoft.AspNet.SignalR.Client;
 using NLog.Common;
 using NLog.Config;
@@ -7,15 +7,15 @@ using NLog.Targets;
 namespace NLog.SignalR
 {
     [Target("SignalR")]
-    public class SignalRTarget : TargetWithLayout
+    public sealed class SignalRTarget : TargetWithLayout
     {
         [RequiredParameter]
         public string Uri { get; set; }
 
-        [RequiredParameter]
+        [DefaultValue("LoggingHub")]
         public string HubName { get; set; }
 
-        [RequiredParameter]
+        [DefaultValue("Log")]
         public string MethodName { get; set; }
 
         public IHubProxyFactory ProxyFactory { get; set; }
@@ -24,35 +24,37 @@ namespace NLog.SignalR
 
         public SignalRTarget()
         {
+            HubName = "LoggingHub";
+            MethodName = "Log";
             ProxyFactory = new HubProxyFactory();
         }
 
-        protected override void InitializeTarget()
+        protected override void Write(LogEventInfo logEvent)
         {
-            _proxy = ProxyFactory.Create(Uri, HubName);
-            base.InitializeTarget();
+            Log(logEvent);
         }
 
         protected override void Write(AsyncLogEventInfo logEvent)
         {
-            base.Write(logEvent);
-            var renderedMessage = Layout.Render(logEvent.LogEvent);
-            var item = new LogItem(logEvent.LogEvent, renderedMessage);
+            Log(logEvent.LogEvent);
+        }
+
+        private void Log(LogEventInfo logEvent)
+        {
+            EnsureProxyExists();
+
+            if (_proxy == null)
+                return;
+
+            var renderedMessage = Layout.Render(logEvent);
+            var item = new LogEvent(logEvent, renderedMessage);
             _proxy.Invoke(MethodName, item);
         }
 
-        public class LogItem
+        private void EnsureProxyExists()
         {
-            public string Level { get; private set; }
-            public DateTime TimeStamp { get; private set; }
-            public string Message { get; private set; }
-
-            public LogItem(LogEventInfo eventInfo, string renderedMessage)
-            {
-                Level = eventInfo.Level.Name;
-                TimeStamp = eventInfo.TimeStamp.ToUniversalTime();
-                Message = renderedMessage;
-            }
+            if (_proxy == null)
+                _proxy = ProxyFactory.Create(Uri, HubName);
         }
     }
 }
